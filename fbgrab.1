@@ -1,103 +1,141 @@
-.TH fbgrab 1 "(C) 2002 - 2020 Gunnar Monell, GPL"
+.TH FBGRAB 1
 .SH NAME
-\fBfbgrab\fP - takes screenshots using the framebuffer device
+fbgrab \- take screenshots of the framebuffer
 .SH SYNOPSIS
-.B fbgrab [options] filename
-.SH DESCRIPTION
 .B fbgrab
-reads the \fBframebuffer device\fP (/dev/fb*) or a dump thereof and
-saves a \fBPNG\fP image file. You can use it for making screenshots of
-of virtually any application, from traditional test applications to your
-X-windows desktop, as well as framebuffer applications.
+[
+.B -?iv
+]
+[
+.B -b
+.I bitdepth
+]
+[
+.B -c|-C
+.I console
+]
+[
+.B -d
+.I device
+]
+[
+.B -f
+.I file
+]
+[
+.B -h
+.I height
+]
+[
+.B -s
+.I seconds
+]
+[
+.B -w
+.I width
+]
+[
+.B -z
+.I level
+]
+.I file
+.SH DESCRIPTION
+.I fbgrab
+reads the framebuffer device or a dump thereof and saves a PNG image file.
 .SH OPTIONS
-.TP
+.PD 0
+.TP \w'\fL-b\ \fIbitdepth\fPXX'u
 .B -?
-print usage information.
+Print usage information.
 .TP
-.B -b bitdepth
-the number of bits per pixel used, optional when reading from device.
+.BI -b " bitdepth"
+Specify the number of bits per pixel. This can be figured out automatically if
+reading from a framebuffer device.
 .TP
-.B -c console
-specifies which \fBconsole\fP (or virtual terminal - like other 
-people call this feature) to grab. Sometimes this changing is 
-faster then the framebuffer is refreshed (especially when grabbing
-framebuffer apps). If so, you should \fBuse -C console\fP ... This
-waits some time before grabbing. You can't use \fB-s\fP in this case.
+.BI -C " console"
+Like
+.BR -c ,
+but wait some time before grabbing the virtual terminal.
 .TP
-.B -d device
-specifies which framebuffer device you want to read. If 
-you do not use this option, it takes the value from the 
-\fBFRAMEBUFFER\fP environment variable. If no FRAMEBUFFER 
-environment variable is given or if its value is \fBNULL\fP, then
-DEFAULT_FB is taken. (see source code), which usually is /dev/fb0.
+.BI -c " console"
+Grab a specific virtual terminal.
 .TP
-.B -f filename
-Read from from file instead of device, requires that -w (width), -h (height) and
--b (bitdepth) are specified. 
+.BI -d " device"
+Read the specified framebuffer device. If not given, the environment variable
+.I FRAMEBUFFER
+is used. If it does not exist, a default is used, typically
+.IR /dev/fb0 .
 .TP
-.B -h height
-the height of the frambeuffer in pixels, optional when reading from device.
+.BI -f " file"
+Read from
+.I file
+instead of from a device.
+.BR -w ,
+.BR -h ,
+and
+.B -b
+must be used.
 .TP
-.B -i 
-turns \fBoff\fP interlacing. If you do not want \fBADAM7 interlacing\fP, 
-you should use the \fB-i\fP option.
+.BI -h " height"
+Use specified height.
 .TP
-.B -s seconds
-specifies how many seconds to wait before grabbing. \fBfbshot\fP
-does not lock console switching, so you can switch it while 
-waiting, if you cannot use -c requires normally that fbgrab is run as root.
+.B -i
+Don't do ADAM7 interlacing.
 .TP
-.B -v verbose 
-be verbose 
+.BI -s " seconds"
+Wait before grabbing the screenshot. The virtual terminal can be switched
+while waiting to grab a different virtual terminal.
 .TP
-.B -w width
-the width of the frambeuffer in pixels, optional when reading from device.
+.B -v
+Be verbose.
 .TP
-.B -z 
-set png compression level 0 (fast) to 9 (best).
-
+.BI -w " width"
+Use specified width.
+.TP
+.BI -z " level"
+PNG compression level: 0 is fastest, 9 is best.
+.PD
 .SH TODO
-* Low-end bit depths, eg 1, 2, 4 & 8 bits.
-.TP
-* Companion program fbput that would display a picture in the frambuffer.
-.TP
-* Better utilization of the PNG-lib, all formats are first converted to 32 bitdepth and then stored as PNG - hardly the right approach.
-
+Low-end bit depths, eg 1, 2, 4 & 8 bits.
+.PP
+Companion program
+.B fbput
+that would display a picture in the frambuffer.
+.PP
+Better utilization of the PNG-lib, all formats are first converted to 32
+bitdepth and then stored as PNG\(emhardly the right approach.
 .SH EXAMPLES
-
-.P
+Take a screenshot and store it as
+.IR fb.png :
+.RS
 fbgrab fb.png
-.P
-will take a framebuffer snapshot, or if you don't have fbgrab at your machine, you can do
-.P
-cp /dev/fb0 framebuffer.dump
-.P
-and then 
-.P	
-fbgrab -w 1024 -h 768 -b 16 -f framebuffer.dump fb.png
-.P
-to convert it to a picture.
-
+.RE
+.PP
+Use a framebuffer dump:
+.RS
+cp /dev/fb0 dump
+.br
+fbgrab -w 1024 -h 768 -b 16 -f dump fb.png
+.RE
 .SH AUTHOR
 Written by Gunnar Monell <gunnar.monell@gmail.com>.
-Basically a rewrite of fbshot by Stephan Beyer <fbshot@s-beyer.de>
-
-.SH COPYRIGHT (C) 
-.P
-(C) 2002-2020 Gunnar Monell <gunnar.monell@gmail.com>
-.P 
-(C) 2000 Stephan Beyer <fbshot@s-beyer.de>
-.P
+Basically a rewrite of
+.IR fbshot (1)
+by Stephan Beyer <fbshot@s-beyer.de>.
+.SH COPYRIGHT
+Copyright (C) 2002-2020 Gunnar Monell <gunnar.monell@gmail.com>
+.PP
+Copyright (C) 2000 Stephan Beyer <fbshot@s-beyer.de>
+.PP
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License.
-.P
+it under the terms of the GNU General Public License version 2 as published by
+the Free Software Foundation.
+.PP
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-.P
+.PP
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
