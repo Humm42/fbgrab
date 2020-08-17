@@ -1,25 +1,26 @@
-### 
-### I think it's not worth to make such a small project
-### modular. So this is a simple gnu Makefile...
-###
+.POSIX:
 
-.DELETE_ON_ERROR:
-.PHONY: install clean all
+PREFIX = /usr/local
+MANPREFIX = ${PREFIX}/share/man
+LIBS = -l png -l z
 
-GZIP := gzip
-GZIPFLAGS := --best --to-stdout
-
-all: fbgrab fbgrab.1.gz
+all: fbgrab
 
 fbgrab: fbgrab.c
-	$(CC) -g -Wall $(CFLAGS) $(LDFLAGS) $< -lpng -lz -o $@
+	${CC} -o fbgrab ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} fbgrab.c ${LIBS}
 
-fbgrab.1.gz: fbgrab.1.man
-	$(GZIP) $(GZIPFLAGS) $< > $@
+install: fbgrab
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	cp -f fbgrab ${DESTDIR}${PREFIX}/bin/fbgrab
+	chmod 555 ${DESTDIR}${PREFIX}/bin/fbgrab
+	mkdir -p ${DESTDIR}${MANPREFIX}/man1
+	cp -f fbgrab.1 ${DESTDIR}${MANPREFIX}/man1/fbgrab.1
+	chmod 444 ${DESTDIR}${MANPREFIX}/man1/fbgrab.1
 
-install: fbgrab fbgrab.1.gz
-	install -D -m 0755 fbgrab $(DESTDIR)/usr/bin/fbgrab
-	install -D -m 0644 fbgrab.1.gz $(DESTDIR)/usr/share/man/man1/fbgrab.1.gz
+uninstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/fbgrab ${DESTDIR}${MANPREFIX}/man1/fbgrab.1
 
 clean:
-	-$(RM) fbgrab fbgrab.1.gz *~ \#*\#
+	rm -f fbgrab
+
+.PHONY: all install uninstall clean
