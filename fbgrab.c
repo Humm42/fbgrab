@@ -117,10 +117,9 @@ static unsigned short int change_to_vt(unsigned short int vt_num)
     return old_vt;
 }
 
-static void get_framebufferdata(char *device, struct fb_var_screeninfo *fb_varinfo_p, int verbose)
+static void get_framebufferdata(char *device, struct fb_var_screeninfo *fb_varinfo_p, struct fb_fix_screeninfo *fb_fixinfo_p, int verbose)
 {
     int fd;
-    struct fb_fix_screeninfo fb_fixedinfo;
     
     /* now open framebuffer device */
     if(-1 == (fd=open(device, O_RDONLY)))
@@ -132,14 +131,14 @@ static void get_framebufferdata(char *device, struct fb_var_screeninfo *fb_varin
     if (ioctl(fd, FBIOGET_VSCREENINFO, fb_varinfo_p) != 0)
 	fatal_error("ioctl FBIOGET_VSCREENINFO");
 
-    if (ioctl(fd, FBIOGET_FSCREENINFO, &fb_fixedinfo) != 0)
+    if (ioctl(fd, FBIOGET_FSCREENINFO, fb_fixinfo_p) != 0)
 	fatal_error("ioctl FBIOGET_FSCREENINFO");
 
     if (verbose)
     {
         fprintf(stderr, "frame buffer fixed info:\n");
-        fprintf(stderr, "id: \"%s\"\n", fb_fixedinfo.id);
-    	switch (fb_fixedinfo.type) 
+        fprintf(stderr, "id: \"%s\"\n", fb_fixinfo_p->id);
+    	switch (fb_fixinfo_p->type) 
     	{
     	case FB_TYPE_PACKED_PIXELS:
 		fprintf(stderr, "type: packed pixels\n");
@@ -160,7 +159,7 @@ static void get_framebufferdata(char *device, struct fb_var_screeninfo *fb_varin
 		fprintf(stderr, "type: undefined!\n");
 		break;
     	}
-        fprintf(stderr, "line length: %i bytes (%i pixels)\n", fb_fixedinfo.line_length, fb_fixedinfo.line_length/(fb_varinfo_p->bits_per_pixel/8));
+        fprintf(stderr, "line length: %i bytes (%i pixels)\n", fb_fixinfo_p->line_length, fb_fixinfo_p->line_length/(fb_varinfo_p->bits_per_pixel/8));
     
         fprintf(stderr, "\nframe buffer variable info:\n");
         fprintf(stderr, "resolution: %ix%i\n", fb_varinfo_p->xres, fb_varinfo_p->yres);
@@ -406,6 +405,7 @@ int main(int argc, char **argv)
     size_t buf_size;
     char infile[MAX_LEN];
     struct fb_var_screeninfo fb_varinfo;
+    struct fb_fix_screeninfo fb_fixinfo;
     int waitbfg=0; /* wait before grabbing (for -C )... */
     int interlace = PNG_INTERLACE_NONE;
     int verbose = 0;
@@ -414,6 +414,7 @@ int main(int argc, char **argv)
 
     memset(infile, 0, MAX_LEN);
     memset(&fb_varinfo, 0, sizeof(struct fb_var_screeninfo));
+    memset(&fb_fixinfo, 0, sizeof(struct fb_fix_screeninfo));
 
 
     for(;;)
@@ -496,13 +497,13 @@ int main(int argc, char **argv)
 	    }
 	}
 
-	get_framebufferdata(device, &fb_varinfo, verbose);
+	get_framebufferdata(device, &fb_varinfo, &fb_fixinfo, verbose);
 	
 	if (UNDEFINED == bitdepth)
 	    bitdepth = (int) fb_varinfo.bits_per_pixel;
 	
 	if (UNDEFINED == width)
-	    width = (int) fb_varinfo.xres;
+	    width = (int) fb_fixinfo.line_length / (fb_varinfo.bits_per_pixel / 8);
 	
 	if (UNDEFINED == height)
 	    height = (int) fb_varinfo.yres;
