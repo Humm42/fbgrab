@@ -1,17 +1,24 @@
 /*
- * fbgrab - takes screenshots using the framebuffer.
+ * fbgrab - take screenshots of the framebuffer.
  *
- * (C) Gunnar Monell <gmo@linux.nu> 2002
+ * Copyright © 2020 Humm <hummsmith42@gmail.com>
+ * Copyright © 2002 Gunnar Monell <gmo@linux.nu>
+ * Copyright © 2000 Stephan Beyer <fbshot@s-beyer.de>
  *
- * This program is free Software, see the COPYING file
- * and is based on Stephan Beyer's <fbshot@s-beyer.de> FBShot
- * (C) 2000.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; version 2.
+
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * For features and differences, read the manual page.
- *
- * This program has been checked with "splint +posixlib" without
- * warnings. Splint is available from http://www.splint.org/ .
- * Patches and enhancements of fbgrab have to fulfill this too.
+ * fbgrab is based on Stephan Beyer’s FBShot.
  */
 
 #include <errno.h>
