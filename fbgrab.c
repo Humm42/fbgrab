@@ -14,8 +14,8 @@
  * Patches and enhancements of fbgrab have to fulfill this too.
  */
 
+#include <errno.h>
 #include <fcntl.h>
-#include <getopt.h>
 #include <linux/fb.h>
 #include <png.h>
 #include <stdio.h>
@@ -41,53 +41,35 @@ static const int	Green = 1;
 static const int	Red = 2;
 static const int	Alpha = 3;
 
-/*@noreturn@ */ static void
+/* noreturn */ static void
 fatal_error(char *message)
 {
 	fprintf(stderr, "%s\n", message);
 	exit(EXIT_FAILURE);
 }
 
-static void
-usage(char *binary)
+static int
+myatoi(char *s)
 {
-	fprintf(stderr,
-	        "Usage:   %s\t[-hi] [-{C|c} vt] [-d dev] [-s n] [-z n]\n"
-	        "\t\t[-f fromfile -w n -h n -b n] filename.png\n", binary);
+	errno = 0;
+	int i = (int)strtol(s, 0, 10);
+	if (errno != 0) {
+		fprintf(stderr,
+		        "converting string “%s” to integer failed: ", s);
+		perror(0);
+		exit(EXIT_FAILURE);
+	}
+	return i;
 }
 
 static void
-help(char *binary)
+usage(char *binary)
 {
-	fprintf(stderr,
-	        "fbgrab - takes screenshots using the framebuffer, v%s\n",
-	        VERSION);
-
-	usage(binary);
-
-	fprintf(stderr, "\nPossible options:\n");
-	/* please keep this list alphabetical */
-	fprintf(stderr,
-	        "\t-b n  \tforce use of n bits/pixel, required when reading from file\n");
-	fprintf(stderr,
-	        "\t-C n  \tgrab from console n, for slower framebuffers\n");
-	fprintf(stderr, "\t-c n  \tgrab from console n\n");
-	fprintf(stderr,
-	        "\t-d dev\tuse framebuffer device dev instead of default\n");
-	fprintf(stderr, "\t-f file\t read from file instead of framebuffer\n");
-	fprintf(stderr,
-	        "\t-h n  \tset height to n pixels, required when reading from file\n"
-	        "\t\tcan be used to force height when reading from framebuffer\n");
-	fprintf(stderr, "\t-i    \tturns on interlacing in PNG\n");
-	fprintf(stderr,
-	        "\t-s n  \tsleep n seconds before making screenshot\n");
-	fprintf(stderr, "\t-v    \tverbose, print debug information.\n");
-	fprintf(stderr,
-	        "\t-w n  \tset width to n pixels, required when reading from file\n"
-	        "\t\tcan be used to force width when reading from framebuffer\n");
-	fprintf(stderr,
-	        "\t-z n  \tPNG compression level: 0 (fast) .. 9 (best)\n");
-	fprintf(stderr, "\t-?    \tprint this usage information\n");
+	fprintf(stderr, "usage: %s [ -iv ] [ -b bitdepth ] [ -c|-C console ] "
+	                "[ -d device ] [ -f file ] [ -h height ] "
+	                "[ -s seconds ] [ -w width ] [ -z level ] file\n",
+	                binary);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -452,19 +434,17 @@ main(int argc, char **argv)
 	memset(&fb_varinfo, 0, sizeof fb_varinfo);
 	memset(&fb_fixinfo, 0, sizeof fb_fixinfo);
 
-	for (;;) {
-		optc = getopt(argc, argv, "f:z:w:b:h:iC:c:d:s:?v");
-		if (optc == -1)
-			break;
+	opterr = 0;
+	while ((optc = getopt(argc, argv, "b:C:c:d:f:h:is:vw:z:")) != -1) {
 		switch (optc) {
 		case 'b':
-			bitdepth = atoi(optarg);
+			bitdepth = myatoi(optarg);
 			break;
 		case 'C':
 			waitbfg = 1;
 			/* fallthrough */
 		case 'c':
-			vt_num = atoi(optarg);
+			vt_num = myatoi(optarg);
 			break;
 		case 'd':
 			device = optarg;
@@ -473,7 +453,7 @@ main(int argc, char **argv)
 			strncpy(infile, optarg, MAX_LEN);
 			break;
 		case 'h':
-			height = atoi(optarg);
+			height = myatoi(optarg);
 			break;
 		case 'i':
 			interlace = PNG_INTERLACE_ADAM7;
@@ -482,23 +462,20 @@ main(int argc, char **argv)
 			verbose = 1;
 			break;
 		case 's':
-			(void)sleep((unsigned int)atoi(optarg));
+			sleep((unsigned int)myatoi(optarg));
 			break;
 		case 'w':
-			width = atoi(optarg);
+			width = myatoi(optarg);
 			break;
 		case 'z':
-			png_compression = atoi(optarg);
+			png_compression = myatoi(optarg);
 			break;
-		case '?':
-			help(argv[0]);
-			return 1;
 		default:
 			usage(argv[0]);
 		}
 	}
 
-	if (optind == argc || argc - optind != 1) {
+	if (argc - optind != 1) {
 		usage(argv[0]);
 		return 1;
 	}
