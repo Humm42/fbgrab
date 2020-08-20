@@ -1,5 +1,7 @@
 .POSIX:
 
+MYCPPFLAGS = -D_POSIX_C_SOURCE=200809L ${CPPFLAGS}
+
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 LIBS = -l png -l z
@@ -7,7 +9,7 @@ LIBS = -l png -l z
 all: fbgrab
 
 fbgrab: fbgrab.c
-	${CC} -o fbgrab ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} fbgrab.c ${LIBS}
+	${CC} -o fbgrab ${CFLAGS} ${MYCPPFLAGS} ${LDFLAGS} fbgrab.c ${LIBS}
 
 install: fbgrab
 	mkdir -p ${DESTDIR}${PREFIX}/bin
